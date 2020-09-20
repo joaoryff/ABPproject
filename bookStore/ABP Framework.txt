@@ -1,0 +1,196 @@
+Opcao 1 CLI 
+Opcao 2 Download
+
+
+ClI  pShell   -  dotenet tool install -g Volo.Abp.ClI
+				- abp new Acme.BookStore
+
+
+
+criar a DB    - dbmigration  debug run   
+
+set start project  Web  roda(f5)
+
+password 1q2w3E*
+
+
+<Guid> PK
+AggregateRoot  base Class typical
+
+
+////////////////////////////////
+
+Passo 1  Domain
+Criar as class
+
+ public class Book : AuditedAggregateRoot<Guid>
+    {
+        public string Name { get; set; }
+        public BookType Type { get; set; }
+        public DateTime PublishDate { get; set; }
+        public float Price { get; set; }
+    }
+	
+Passo 2  Domain.Shared
+ 
+ public enum BookType
+    { 
+        Undentify, Action, adventure,
+        Art, architecture,......
+	}
+	
+Passo 3 EntityFrameworkCore ->DbContext
+
+	public class BookStoreDbContext : AbpDbContext<BookStoreDbContext>
+    {...... public DbSet<AppUser> Users { get; set; }.....
+	
+	 public DbSet<Book> Books { get; set; }
+	 
+Passo 4 ModelCreatingExtensions 
+
+Definir o mapping
+
+App.books vai ser o default.
+
+public static void ConfigureBookStore(this ModelBuilder builder)
+        {
+            Check.NotNull(builder, nameof(builder));......
+
+	 builder.Entity<Book>(b =>
+            {
+                b.ToTable(BookStoreConsts.DbTablePrefix + "Books", BookStoreConsts.DbSchema);
+                b.ConfigureByConvention(); //auto configure for the base class props
+                b.Property(x => x.Name).IsRequired().HasMaxLength(128);
+            });
+			
+Passo 5  Abrir o Packge manager console	
+
+New database Migration		
+
+abrir o Packge manager console	selecionar(default project)  EntityFrameworkCore.DbMigration
+
+add-migration "Added_Books"
+
+Passo 6 Criar Class BookStoreDataSeederContributor 
+
+Domain  add Class
+
+public class BookStoreDataSeederContributor : IDataSeedContributor, ITransientDependency
+    {
+        public Task SeedAsync(DataSeedContext context)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+passo 7  Update a Class BookStoreDataSeederContributor 
+
+
+public class BookStoreDataSeederContributor
+        : IDataSeedContributor, ITransientDependency
+    {
+        private readonly IRepository<Book, Guid> _bookRepository;
+        public BookStoreDataSeederContributor(IRepository<Book, Guid> bookRepository)
+        {
+            _bookRepository = bookRepository;
+        }
+
+        public async Task SeedAsync(DataSeedContext context)
+        {
+            if (await _bookRepository.GetCountAsync() <= 0)
+            {
+                await _bookRepository.InsertAsync(
+                new Book
+                {
+                    Name = "1984",
+                    Type = BookType.Dystopia,
+                    PublishDate = new DateTime(1949, 6, 8),
+                    Price = 19.84f
+                },
+                autoSave: true
+            );
+
+                await _bookRepository.InsertAsync(
+                    new Book
+                    {
+                        Name = "The Hitchhiker's Guide to the Galaxy",
+                        Type = BookType.ScienceFiction,
+                        PublishDate = new DateTime(1995, 9, 27),
+                        Price = 42.0f
+                    },
+                    autoSave: true
+                );
+            }
+        }
+    }
+	
+	passo 8 Rodar o DBMigrator (setar) (migrar data, agora tem samples)
+	
+	passo 9  Criar pasta Books no Applications.COntracts e class
+	
+	 public class BookDto: AuditedEntityDto<Guid>
+    {
+        public string Name { get; set; }
+        public BookType Type { get; set; }
+        public DateTime PublishDate { get; set; }
+        public float Price { get; set; }
+    }
+	
+	passo 10  ApplicationAutoMapperProfile 
+	
+	   public BookStoreApplicationAutoMapperProfile()
+        {
+            CreateMap<Book, BookDto>();
+            /* You can configure your AutoMapper mapping configuration here.
+             * Alternatively, you can split your mapping configurations
+             * into multiple profile classes for a better organization. */
+        }
+	
+	passo 11 Criar class Update no Applications.COntracts
+	
+	  public class CreateUpdateBookDto
+    {
+        [Required]
+        [StringLength(128)]
+        public string Name { get; set; }
+
+        [Required]
+        public BookType Type { get; set; } = BookType.Undefined;
+
+        [Required]
+        [DataType(DataType.Date)]
+        public DateTime PublishDate { get; set; } = DateTime.Now;
+
+        [Required]
+        public float Price { get; set; }
+    }
+}
+
+Passo 12  define map application/aplicationAutoMapperProfile
+
+ public BookStoreApplicationAutoMapperProfile()
+        {
+            CreateMap<Book, BookDto>();
+            CreateMap<CreateUpdateBookDto, Book>();            
+        }
+		
+Passo 13 Criar interface  Contracts/Books
+
+	
+	public interface IBookAppService :
+
+        ICrudAppService< //Defines CRUD methods
+            BookDto, //Used to show books
+            Guid, //Primary key of the book entity
+            PagedAndSortedResultRequestDto, //Used for paging/sorting
+            CreateUpdateBookDto> //Used to create/update a book
+
+    {
+
+    }
+	
+passo 14 criar no Application  pasta books BookAppService 26:25
+
+
+
