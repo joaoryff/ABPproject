@@ -26,6 +26,7 @@ namespace Acme.BookStore.DbMigrator
                 .WriteTo.Console()
                 .CreateLogger();
 
+
             await CreateHostBuilder(args).RunConsoleAsync();
         }
 
