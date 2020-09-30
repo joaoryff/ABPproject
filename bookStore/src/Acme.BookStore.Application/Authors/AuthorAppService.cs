@@ -21,6 +21,7 @@ namespace Acme.BookStore.Authors
             _authorRepository = authorRepository;
             _authorManager = authorManager;
         }
+
         public async Task<AuthorDto> GetAsync(Guid id)
         {
             var author = await _authorRepository.GetAsync(id);
@@ -89,9 +90,5 @@ namespace Acme.BookStore.Authors
         {
             await _authorRepository.DeleteAsync(id);
         }
-
-
-
-        //...SERVICE METHODS WILL COME HERE...
     }
 }

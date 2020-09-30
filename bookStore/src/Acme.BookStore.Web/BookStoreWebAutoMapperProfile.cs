@@ -1,4 +1,4 @@
-﻿using Acme.BookStore.Authors; // ADDED NAMESPACE IMPORT
+﻿using Acme.BookStore.Authors;
 using Acme.BookStore.Books;
 using AutoMapper;
 
@@ -10,9 +10,14 @@ namespace Acme.BookStore.Web
         {
             CreateMap<BookDto, CreateUpdateBookDto>();
 
-            // ADD a NEW MAPPING
-            CreateMap<Pages.Authors.CreateModalModel.CreateAuthorViewModel,
-                      CreateAuthorDto>();
+            CreateMap<Pages.Authors.CreateModalModel.CreateAuthorViewModel, CreateAuthorDto>();
+
+            //CreateMap<AuthorDto, Pages.Authors.EditModalModel.EditAuthorViewModel>();
+            //CreateMap<Pages.Authors.EditModalModel.EditAuthorViewModel, UpdateAuthorDto>();
+
+            //CreateMap<Pages.Books.CreateModalModel.CreateBookViewModel, CreateUpdateBookDto>();
+            //CreateMap<BookDto, Pages.Books.EditModalModel.EditBookViewModel>();
+            //CreateMap<Pages.Books.EditModalModel.EditBookViewModel, CreateUpdateBookDto>();
         }
     }
 }
