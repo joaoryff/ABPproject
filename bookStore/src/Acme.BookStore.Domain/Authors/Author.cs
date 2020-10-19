@@ -42,7 +42,5 @@ namespace Acme.BookStore.Authors
                 maxLength: AuthorConsts.MaxNameLength
             );
         }
-
     }
-
 }
